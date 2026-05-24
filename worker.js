@@ -2689,6 +2689,8 @@ Sitemap: https://example.com/sitemap.xml
         const CACHE_TTL = 300;
         const tasks = linkDataList.map((linkData) => async () => {
             const { ip, port } = linkData;
+            // 跳過 self-test 節點（Worker 域名，唔支援 TCP ping，會顯示 -1ms）
+            if (linkData.source === 'self-test') return linkData;
             if (!ip || !port) return null;
             const cacheKey = `node-alive:${ip}:${port}`;
             if (KV) {
