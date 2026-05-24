@@ -820,7 +820,7 @@ Sitemap: https://example.com/sitemap.xml
                     }
                 }
 
-                const customPreferred = getConfigValue('yx', env.yx || env.YX);
+                const customPreferred = getConfigValue('cp', '');  // cp = custom preferred (country IPs), separate from yx
                 if (customPreferred) {
                     try {
                         const preferredList = customPreferred.split(',').map(item => item.trim()).filter(item => item);

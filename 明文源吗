@@ -2541,7 +2541,7 @@ body {
                 regionNames: {
                     HK: '🇭🇰 香港', US: '🇺🇸 美国', SG: '🇸🇬 新加坡', JP: '🇯🇵 日本',
                     KR: '🇰🇷 韩国', DE: '🇩🇪 德国', SE: '🇸🇪 瑞典', NL: '🇳🇱 荷兰',
-                    FI: '🇫🇮 芬兰', GB: '🇬🇧 英国'
+                    FI: '🇫🇮 芬兰', GB: '🇬🇧 英国', TR: '🇹🇷 土耳其'
                 },
                 terminal: '终端 v2.9.7',
                 githubProject: 'GitHub 项目',
@@ -2709,7 +2709,12 @@ body {
                 kvNotEnabled: 'ذخیره‌سازی KV پیکربندی نشده است',
                 kvCheckFailed: 'بررسی ذخیره‌سازی KV ناموفق: خطای فرمت پاسخ',
                 kvCheckFailedStatus: 'بررسی ذخیره‌سازی KV ناموفق - کد وضعیت: ',
-                kvCheckFailedError: 'بررسی ذخیره‌سازی KV ناموفق - خطا: '
+                kvCheckFailedError: 'بررسی ذخیره‌سازی KV ناموفق - خطا: ',
+                regionNames: {
+                    HK: '🇭🇰 هنگ‌کنگ', US: '🇺🇸 آمریکا', SG: '🇸🇬 سنگاپور', JP: '🇯🇵 ژاپن',
+                    KR: '🇰🇷 کره', DE: '🇩🇪 آلمان', SE: '🇸🇪 سوئد', NL: '🇳🇱 هلند',
+                    FI: '🇫🇮 فنلاند', GB: '🇬🇧 بریتانیا', TR: '🇹🇷 ترکیه'
+                }
             }
         };
 
@@ -3773,6 +3778,7 @@ hr {
                                     <option value="NL">${t.regionNames.NL}</option>
                                     <option value="FI">${t.regionNames.FI}</option>
                                     <option value="GB">${t.regionNames.GB}</option>
+                                    <option value="TR">${t.regionNames.TR}</option>
                             </select>
                                 <small id="wkRegionHint" style="color: #7aa9c4; font-size: 0.85rem; display: none;">⚠️ ${t.customIPDisabledHint}</small>
                         </div>
@@ -4258,6 +4264,11 @@ hr {
             function generateClientLink(clientType, clientName) {
                 var currentUrl = window.location.href;
                 var subscriptionUrl = currentUrl + "/sub";
+                // Add country filter from region selector
+                var wkRegionEl = document.getElementById('wkRegion');
+                if (wkRegionEl && wkRegionEl.value) {
+                    subscriptionUrl += "?cc=" + wkRegionEl.value;
+                }
                 var schemeUrl = '';
                 var displayName = clientName || '';
                 var finalUrl = subscriptionUrl;
