@@ -31,6 +31,7 @@
 - 订阅输出过滤（20节点/80%/去重）
 - 多客户端支持：CLASH、SURGE、SING-BOX、LOON、QUANTUMULT X、V2RAY、Shadowrocket、STASH、NEKORAY、V2RAYNG
 - 隐藏订阅 URL
+- **v1.05**: `?cc=` 国家过滤器（CF/CN/HK/JP/US 等）
 
 **UI**
 - 白色暖色调 UI
