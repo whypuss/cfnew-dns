@@ -180,13 +180,28 @@ Sitemap: https://example.com/sitemap.xml
     }
 
     const directDomains = [
-        { name: "cloudflare.182682.xyz", domain: "cloudflare.182682.xyz" }, { name: "speed.marisalnc.com", domain: "speed.marisalnc.com" },
-        { domain: "freeyx.cloudflare88.eu.org" }, { domain: "bestcf.top" }, { domain: "cdn.2020111.xyz" }, { domain: "cfip.cfcdn.vip" },
-        { domain: "cf.0sm.com" }, { domain: "cf.090227.xyz" }, { domain: "cf.zhetengsha.eu.org" }, { domain: "cloudflare.9jy.cc" },
-        { domain: "cf.zerone-cdn.pp.ua" }, { domain: "cfip.1323123.xyz" }, { domain: "cnamefuckxxs.yuchen.icu" }, { domain: "cloudflare-ip.mofashi.ltd" },
-        { domain: "115155.xyz" }, { domain: "cname.xirancdn.us" }, { domain: "f3058171cad.002404.xyz" }, { domain: "8.889288.xyz" },
-        { domain: "cdn.tzpro.xyz" }, { domain: "cf.877771.xyz" }, { name: "移動優選", domain: "bestcf.030101.xyz" },
-        { domain: "xn--b6gac.eu.org" }
+        { name: "cloudflare.182682.xyz", domain: "cloudflare.182682.xyz", regionCode: "CF" },
+        { name: "speed.marisalnc.com", domain: "speed.marisalnc.com", regionCode: "CF" },
+        { name: "移動優選", domain: "bestcf.030101.xyz", regionCode: "CN" },
+        { domain: "freeyx.cloudflare88.eu.org", regionCode: "CF" },
+        { domain: "bestcf.top", regionCode: "CF" },
+        { domain: "cdn.2020111.xyz", regionCode: "CF" },
+        { domain: "cfip.cfcdn.vip", regionCode: "CF" },
+        { domain: "cf.0sm.com", regionCode: "CF" },
+        { domain: "cf.090227.xyz", regionCode: "CF" },
+        { domain: "cf.zhetengsha.eu.org", regionCode: "CF" },
+        { domain: "cloudflare.9jy.cc", regionCode: "CF" },
+        { domain: "cf.zerone-cdn.pp.ua", regionCode: "CF" },
+        { domain: "cfip.1323123.xyz", regionCode: "CF" },
+        { domain: "cnamefuckxxs.yuchen.icu", regionCode: "CF" },
+        { domain: "cloudflare-ip.mofashi.ltd", regionCode: "CF" },
+        { domain: "115155.xyz", regionCode: "CF" },
+        { domain: "cname.xirancdn.us", regionCode: "CF" },
+        { domain: "f3058171cad.002404.xyz", regionCode: "CF" },
+        { domain: "8.889288.xyz", regionCode: "CF" },
+        { domain: "cdn.tzpro.xyz", regionCode: "CF" },
+        { domain: "cf.877771.xyz", regionCode: "CF" },
+        { domain: "xn--b6gac.eu.org", regionCode: "CF" },
     ];
 
     // ★ CMI 修復：用 Google DoH 預解析 directDomains，客戶端直連 IP
@@ -222,6 +237,7 @@ Sitemap: https://example.com/sitemap.xml
                                 ip: aRecord.data,
                                 originalDomain: d.domain,
                                 isp: d.name || d.domain,
+                                regionCode: d.regionCode || 'CF',
                                 resolved: true,
                                 resolvedBy: provider.name,
                             };
@@ -234,6 +250,7 @@ Sitemap: https://example.com/sitemap.xml
                     ip: null,
                     originalDomain: d.domain,
                     isp: d.name || d.domain,
+                    regionCode: d.regionCode || 'CF',
                     resolved: false,
                 };
             })
@@ -2943,6 +2960,7 @@ if (enableECH) {
             if (item.colo && item.colo.trim()) {
                 nodeNameBase = `${nodeNameBase}-${item.colo.trim()}`;
             }
+            const regionCode = item.regionCode || '';
             const safeIP = item.ip.includes(':') ? `[${item.ip}]` : item.ip;
             // Extract raw IP for metadata (remove brackets from IPv6)
             const rawIP = item.ip.includes(':') ? item.ip.replace(/^\[|\]$/g, '') : item.ip;
@@ -2970,7 +2988,7 @@ if (enableECH) {
 
             for (const { port, tls } of portsToGenerate) {
                 const suffix = tls ? '-WS-TLS' : '-WS';
-                const nodeName = `${nodeNameBase}-${port}${suffix}`;
+                const nodeName = regionCode ? `${nodeNameBase}-${regionCode}-${port}${suffix}` : `${nodeNameBase}-${port}${suffix}`;
                 let wsNodeName;
                 if (skipNumbering) {
                     wsNodeName = nodeName;           // 不编号
@@ -3042,6 +3060,7 @@ if (enableECH) {
             if (item.colo && item.colo.trim()) {
                 nodeNameBase = `${nodeNameBase}-${item.colo.trim()}`;
             }
+            const regionCode = item.regionCode || '';
             const safeIP = item.ip.includes(':') ? `[${item.ip}]` : item.ip;
             const rawIP = item.ip.includes(':') ? item.ip.replace(/^\[|\]$/g, '') : item.ip;
 
@@ -3068,7 +3087,7 @@ if (enableECH) {
 
             for (const { port, tls } of portsToGenerate) {
                 const suffix = tls ? `-${atob('VHJvamFu')}-WS-TLS` : `-${atob('VHJvamFu')}-WS`;
-                const nodeName = `${nodeNameBase}-${port}${suffix}`;
+                const nodeName = regionCode ? `${nodeNameBase}-${regionCode}-${port}${suffix}` : `${nodeNameBase}-${port}${suffix}`;
                 let wsNodeName;
                 if (skipNumbering) {
                     wsNodeName = nodeName;           // 不编号
@@ -7433,9 +7452,10 @@ if (enableECH) {
             const port = item.port;
             const safeIP = item.ip.includes(':') ? `[${item.ip}]` : item.ip;
             const rawIP = item.ip.includes(':') ? item.ip.replace(/^\[|\]$/g, '') : item.ip;
+            const regionCode = item.regionCode || '';
 
             const getNodeName = (suffix) => {
-                const nodeName = `${nodeNameBase}-${port}${suffix}`;
+                const nodeName = regionCode ? `${nodeNameBase}-${regionCode}-${port}${suffix}` : `${nodeNameBase}-${port}${suffix}`;
                 if (skipNumbering) return nodeName;
                 return namer(nodeNameBase, nodeName);
             };
@@ -7493,12 +7513,13 @@ if (enableECH) {
             if (!nodeNameBase) continue;
             nodeNameBase = nodeNameBase.replace(/\s/g, '_');
             if (item.colo) nodeNameBase = `${nodeNameBase}-${item.colo}`;
+            const regionCode = item.regionCode || '';
             const safeIP = item.ip.includes(':') ? `[${item.ip}]` : item.ip;
             const rawIP = item.ip.includes(':') ? item.ip.replace(/^\[|\]$/g, '') : item.ip;
             const port = item.port || 443;
 
             const getNodeName = (suffix) => {
-                const nodeName = `${nodeNameBase}-${port}${suffix}`;
+                const nodeName = regionCode ? `${nodeNameBase}-${regionCode}-${port}${suffix}` : `${nodeNameBase}-${port}${suffix}`;
                 if (skipNumbering) return nodeName;
                 return namer(nodeNameBase, nodeName);
             };
@@ -7547,9 +7568,10 @@ if (enableECH) {
             const port = item.port;
             const safeIP = item.ip.includes(':') ? `[${item.ip}]` : item.ip;
             const rawIP = item.ip.includes(':') ? item.ip.replace(/^\[|\]$/g, '') : item.ip;
+            const regionCode = item.regionCode || '';
 
             const getNodeName = (suffix) => {
-                const nodeName = `${nodeNameBase}-${port}${suffix}`;
+                const nodeName = regionCode ? `${nodeNameBase}-${regionCode}-${port}${suffix}` : `${nodeNameBase}-${port}${suffix}`;
                 if (skipNumbering) return nodeName;
                 return namer(nodeNameBase, nodeName);
             };
