@@ -2728,7 +2728,8 @@ Sitemap: https://example.com/sitemap.xml
 
         // P1-1: KV subscription cache - cache key fingerprint
         const countryFilter = url.searchParams.get('cc')?.toUpperCase() || '';
-        const cacheFingerprint = `${user}|${target}|${echConfig || ''}|${ev}|${et}|${ex}|${ena}|${epi}|${epd}|${egi}|${disablePreferred}|${piu}|${enableECH}|${countryFilter}`;
+        const enableLivenessCheck = url.searchParams.get('check') === '1';
+        const cacheFingerprint = `${user}|${target}|${echConfig || ''}|${ev}|${et}|${ex}|${ena}|${epi}|${epd}|${egi}|${disablePreferred}|${piu}|${enableECH}|${countryFilter}|${enableLivenessCheck ? '1' : '0'}`;
         const cacheKey = `sub:${await hashFingerprint(cacheFingerprint)}`;
 
         // P1-1: Check KV cache for HIT at start of function
@@ -2923,7 +2924,6 @@ Sitemap: https://example.com/sitemap.xml
             : linkStrings;
 
         // ★ 存活過濾（可用 ?check=1 開啟，避免每次都測試拖慢速度）
-        const enableLivenessCheck = url.searchParams.get('check') === '1';
         let checkedLinks = finalLinks;
         if (enableLivenessCheck) {
             checkedLinks = await filterAliveNodes(finalLinks, env);
