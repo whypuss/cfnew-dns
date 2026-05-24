@@ -2857,34 +2857,34 @@ Sitemap: https://example.com/sitemap.xml
             case atob('c3VyZ2Uy'):
             case atob('c3VyZ2Uz'):
             case atob('c3VyZ2U0'):
-                subscriptionContent = generateSurgeIni(linkStrings);
+                subscriptionContent = generateSurgeIni(filteredLinkStrings);
                 contentType = 'text/plain; charset=utf-8';
                 break;
             case atob('cXVhbnR1bXVsdA=='):  // quantumult
             case atob('cXVhbng='):          // quanx
             case 'quanx':
-                subscriptionContent = generateQuanxConf(linkStrings);
+                subscriptionContent = generateQuanxConf(filteredLinkStrings);
                 contentType = 'text/plain; charset=utf-8';
                 break;
             case atob('c3M='):
             case atob('c3Ny'):
-                subscriptionContent = btoa(linkStrings.join('\n'));
+                subscriptionContent = btoa(filteredLinkStrings.join('\n'));
                 break;
             case atob('djJyYXk='):
-                subscriptionContent = btoa(linkStrings.join('\n'));
+                subscriptionContent = btoa(filteredLinkStrings.join('\n'));
                 break;
             case atob('bG9vbg=='):
-                subscriptionContent = generateLoonIni(linkStrings);
+                subscriptionContent = generateLoonIni(filteredLinkStrings);
                 contentType = 'text/plain; charset=utf-8';
                 break;
             case atob('c2luZ2JveA=='):  // singbox
             case 'sing-box':
             case 'singbox':
-                subscriptionContent = generateSingBoxJson(linkStrings);
+                subscriptionContent = generateSingBoxJson(filteredLinkStrings);
                 contentType = 'application/json; charset=utf-8';
                 break;
             default:
-                subscriptionContent = btoa(linkStrings.join('\n'));
+                subscriptionContent = btoa(filteredLinkStrings.join('\n'));
         }
 
         // P1-1: KV subscription cache WRITE after content generation (15min TTL)
@@ -2893,7 +2893,7 @@ Sitemap: https://example.com/sitemap.xml
                 const cacheData = JSON.stringify({
                     subscriptionContent: subscriptionContent,
                     contentType: contentType,
-                    finalLinks: linkStrings, // P1-2: Store link strings instead of objects for cache compatibility
+                    finalLinks: filteredLinkStrings, // P1-2: Store link strings instead of objects for cache compatibility
                 });
                 await kvStore.put(cacheKey, cacheData, { expirationTtl: 900 });
             } catch (_) {}
