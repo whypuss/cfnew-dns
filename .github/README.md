@@ -1,19 +1,22 @@
-# cfnew-cat v1.02
+# cfnew-cat v1.03
 
 > ⚠️ **部署后请将兼容日期设置为 `2026-01-20`**
 
 ---
 
-## 🐱 v1.02 更新内容（2025-05）
+## 🐱 v1.03 更新内容（2026-01-20）
 
-### 修覆
+### 修复
+- **direct-domains 恢复**：VoWiFi/CMI 移动用户可通过 `epd=yes` 开启 direct-domains，节点直连 IP 绕过域名
+- **DoH 多 Provider 回退**：`resolveDomainsToIPs` 支持 cloudflare-dns.com → dns.google → quad9.net 任一成功即返回
+
+### v1.02 Quarantine 修复（保留）
 - **backupHost 漏網**：6 處 `bestBackupIP.domain` 全部改為 `.address`，彻底切断域名依赖
 - **Quarantine 繞過**：`source === 'direct-domains'` 的節點跳過 quarantine 檢查
 - **Quarantine Key**：从 IP 級別改為 IP+Port 複合 key，避免同一 IP 不同端口被錯誤隔離
 
 ### v1.01 DNS 迴圈修復（保留）
 - **backupIPs 硬編碼**：移除所有 `ProxyIP.*.CMLiussss.net` 域名，改用 Cloudflare Anycast IP
-- **resolveDomainsToIPs**：Google DoH 預解析 directDomains，客戶端直連真實 IP
 - **`forwardTCP` retryConnection**：fallback 階段直接使用 `.address`
 
 ---
