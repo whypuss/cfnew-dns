@@ -2715,6 +2715,7 @@ Sitemap: https://example.com/sitemap.xml
         if (!url) url = new URL(request.url);
 
         const finalLinks = [];
+        const responseHeaders = {};
         const workerDomain = url.hostname;
         const target = url.searchParams.get('target') || 'base64';
 
