@@ -2964,7 +2964,7 @@ case atob('c3M='):
             case atob('djJyYXk='):
                 subscriptionContent = btoa(checkedLinkStrings.join('\n'));
                 break;
-            case atob('bG9vbg==):
+            case atob('bG9vbg=='):
                 subscriptionContent = generateLoonIni(checkedLinkStrings);
                 contentType = 'text/plain; charset=utf-8';
                 break;
