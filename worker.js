@@ -2647,72 +2647,6 @@ Sitemap: https://example.com/sitemap.xml
         }
     }
 
-    // ============================================================
-    // PATCH: 節點存活測試 + 過濾死節點
-    // ============================================================
-
-    async function testNodeAlive(ip, port, timeoutMs = 3000) {
-        try {
-            const socket = connect({ hostname: ip, port: parseInt(port) });
-            await Promise.race([
-                socket.opened,
-                new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('timeout')), timeoutMs)
-                ),
-            ]);
-            socket.close().catch(() => {});
-            return true;
-        } catch {
-            return false;
-        }
-    }
-
-    async function runWithConcurrency(tasks, limit = 20) {
-        const results = [];
-        const executing = [];
-        for (const task of tasks) {
-            const p = Promise.resolve().then(() => task());
-            results.push(p);
-            if (limit <= tasks.length) {
-                const e = p.finally(() => executing.splice(executing.indexOf(e), 1));
-                executing.push(e);
-                if (executing.length >= limit) {
-                    await Promise.race(executing);
-                }
-            }
-        }
-        return Promise.all(results);
-    }
-
-    async function filterAliveNodes(linkDataList, env) {
-        const KV = env?.KV || null;
-        const CACHE_TTL = 300;
-        const tasks = linkDataList.map((linkData) => async () => {
-            const { ip, port } = linkData;
-            // 跳過 self-test 節點（Worker 域名，唔支援 TCP ping，會顯示 -1ms）
-            if (linkData.source === 'self-test') return linkData;
-            if (!ip || !port) return null;
-            const cacheKey = `node-alive:${ip}:${port}`;
-            if (KV) {
-                try {
-                    const cached = await KV.get(cacheKey);
-                    if (cached !== null) {
-                        return cached === 'true' ? linkData : null;
-                    }
-                } catch { /* KV 失敗就跳過緩存 */ }
-            }
-            const alive = await testNodeAlive(ip, port);
-            if (KV) {
-                try {
-                    await KV.put(cacheKey, String(alive), { expirationTtl: CACHE_TTL });
-                } catch { /* 寫入失敗不影響結果 */ }
-            }
-            return alive ? linkData : null;
-        });
-        const results = await runWithConcurrency(tasks, 20);
-        return results.filter(Boolean);
-    }
-
     async function handleSubscriptionRequest(request, user, url = null, env = null) {
         if (!url) url = new URL(request.url);
 
@@ -2731,8 +2665,7 @@ Sitemap: https://example.com/sitemap.xml
 
         // P1-1: KV subscription cache - cache key fingerprint
         const countryFilter = url.searchParams.get('cc')?.toUpperCase() || '';
-        const enableLivenessCheck = url.searchParams.get('check') === '1';
-        const cacheFingerprint = `${user}|${target}|${echConfig || ''}|${ev}|${et}|${ex}|${ena}|${epi}|${epd}|${egi}|${disablePreferred}|${piu}|${enableECH}|${countryFilter}|${enableLivenessCheck ? '1' : '0'}`;
+        const cacheFingerprint = `${user}|${target}|${echConfig || ''}|${ev}|${et}|${ex}|${ena}|${epi}|${epd}|${egi}|${disablePreferred}|${piu}|${enableECH}|${countryFilter}`;
         const cacheKey = `sub:${await hashFingerprint(cacheFingerprint)}`;
 
         // P1-1: Check KV cache for HIT at start of function
@@ -2926,15 +2859,6 @@ Sitemap: https://example.com/sitemap.xml
               })
             : linkStrings;
 
-        // ★ 存活過濾（可用 ?check=1 開啟，避免每次都測試拖慢速度）
-        let checkedLinks = finalLinks;
-        if (enableLivenessCheck) {
-            checkedLinks = await filterAliveNodes(finalLinks, env);
-            responseHeaders['x-alive-count'] = String(checkedLinks.length);
-            responseHeaders['x-total-count'] = String(finalLinks.length);
-        }
-        const checkedLinkStrings = checkedLinks.map(l => typeof l === 'object' ? l.link : l);
-
         let subscriptionContent;
         let contentType = 'text/plain; charset=utf-8';
 
@@ -2944,41 +2868,41 @@ Sitemap: https://example.com/sitemap.xml
             case 'stash':
             case 'meta':
             case 'clashmeta':
-                subscriptionContent = generateClashYaml(checkedLinkStrings);
+                subscriptionContent = generateClashYaml(filteredLinkStrings);
                 contentType = 'text/yaml; charset=utf-8';
                 break;
             case atob('c3VyZ2U='):     // surge
             case atob('c3VyZ2Uy'):
             case atob('c3VyZ2Uz'):
             case atob('c3VyZ2U0'):
-                subscriptionContent = generateSurgeIni(checkedLinkStrings);
+                subscriptionContent = generateSurgeIni(filteredLinkStrings);
                 contentType = 'text/plain; charset=utf-8';
                 break;
             case atob('cXVhbnR1bXVsdA=='):  // quantumult
             case atob('cXVhbng='):          // quanx
             case 'quanx':
-                subscriptionContent = generateQuanxConf(checkedLinkStrings);
+                subscriptionContent = generateQuanxConf(filteredLinkStrings);
                 contentType = 'text/plain; charset=utf-8';
                 break;
 case atob('c3M='):
             case atob('c3Ny'):
-                subscriptionContent = btoa(checkedLinkStrings.join('\n'));
+                subscriptionContent = btoa(filteredLinkStrings.join('\n'));
                 break;
             case atob('djJyYXk='):
-                subscriptionContent = btoa(checkedLinkStrings.join('\n'));
+                subscriptionContent = btoa(filteredLinkStrings.join('\n'));
                 break;
             case atob('bG9vbg=='):
-                subscriptionContent = generateLoonIni(checkedLinkStrings);
+                subscriptionContent = generateLoonIni(filteredLinkStrings);
                 contentType = 'text/plain; charset=utf-8';
                 break;
             case atob('c2luZ2JveA=='):  // singbox
             case 'sing-box':
             case 'singbox':
-                subscriptionContent = generateSingBoxJson(checkedLinkStrings);
+                subscriptionContent = generateSingBoxJson(filteredLinkStrings);
                 contentType = 'application/json; charset=utf-8';
                 break;
             default:
-                subscriptionContent = btoa(checkedLinkStrings.join('\n'));
+                subscriptionContent = btoa(filteredLinkStrings.join('\n'));
         }
 
         // P1-1: KV subscription cache WRITE after content generation (15min TTL)
@@ -2987,7 +2911,7 @@ case atob('c3M='):
                 const cacheData = JSON.stringify({
                     subscriptionContent: subscriptionContent,
                     contentType: contentType,
-                    finalLinks: enableLivenessCheck ? checkedLinkStrings : filteredLinkStrings, // P1-2: Store link strings instead of objects for cache compatibility
+                    finalLinks: filteredLinkStrings,
                 });
                 await kvStore.put(cacheKey, cacheData, { expirationTtl: 900 });
             } catch (_) {}
