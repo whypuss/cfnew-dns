@@ -2991,10 +2991,8 @@ case atob('c3M='):
             } catch (_) {}
         }
 
-        const responseHeaders = { 
-            'Content-Type': contentType,
-            'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-        };
+        responseHeaders['Content-Type'] = contentType;
+        responseHeaders['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0';
 
         // 添加ECH状态到响应头
 if (enableECH) {
