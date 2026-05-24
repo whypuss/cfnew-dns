@@ -3651,7 +3651,8 @@ if (enableECH) {
                     KR: '🇰🇷 韩国', DE: '🇩🇪 德国', SE: '🇸🇪 瑞典', NL: '🇳🇱 荷兰',
                     FI: '🇫🇮 芬兰', GB: '🇬🇧 英国',
                     AU: '🇦🇺 澳洲', BR: '🇧🇷 巴西', CA: '🇨🇦 加拿大', FR: '🇫🇷 法国',
-                    CH: '🇨🇭 瑞士', RU: '🇷🇺 俄国', IN: '🇮🇳 印度', TW: '🇹🇼 台湾'
+                    CH: '🇨🇭 瑞士', RU: '🇷🇺 俄国', IN: '🇮🇳 印度', TW: '🇹🇼 台湾',
+                    TR: '🇹🇷 土耳其'
                 },
                 terminal: '终端 v2.9.8',
                 githubProject: 'GitHub 项目',
@@ -3821,7 +3822,15 @@ if (enableECH) {
                 kvNotEnabled: 'ذخیره‌سازی KV پیکربندی نشده است',
                 kvCheckFailed: 'بررسی ذخیره‌سازی KV ناموفق: خطای فرمت پاسخ',
                 kvCheckFailedStatus: 'بررسی ذخیره‌سازی KV ناموفق - کد وضعیت: ',
-                kvCheckFailedError: 'بررسی ذخیره‌سازی KV ناموفق - خطا: '
+                kvCheckFailedError: 'بررسی ذخیره‌سازی KV ناموفق - خطا: ',
+                regionNames: {
+                    HK: '🇭🇰 هنگ‌کنگ', US: '🇺🇸 آمریکا', SG: '🇸🇬 سنگاپور', JP: '🇯پ ژاپن',
+                    KR: '🇰🇷 کره', DE: '🇩🇪 آلمان', SE: '🇸🇪 سوئد', NL: '🇳🇱 هلند',
+                    FI: '🇫🇮 فنلاند', GB: '🇬🇧 بریتانیا',
+                    AU: '🇦🇺 استرالیا', BR: '🇧🇷 برزیل', CA: '🇨🇦 کانادا', FR: '🇫🇷 فرانسه',
+                    CH: '🇨🇭 سوئیس', RU: '🇷🇺 روسیه', IN: '🇮🇳 هند', TW: '🇹🇼 تایوان',
+                    TR: '🇹🇷 ترکیه'
+                }
             }
         };
 
@@ -4603,6 +4612,7 @@ if (enableECH) {
                                     <option value="RU">${t.regionNames.RU}</option>
                                     <option value="IN">${t.regionNames.IN}</option>
                                     <option value="TW">${t.regionNames.TW}</option>
+                                    <option value="TR">${t.regionNames.TR}</option>
                             </select>
                                 <small id="wkRegionHint" style="color: #b0b0b0; font-size: 0.85rem; display: none;">⚠️ ${t.customIPDisabledHint}</small>
                         </div>
@@ -5088,6 +5098,11 @@ if (enableECH) {
             function generateClientLink(clientType, clientName) {
                 var currentUrl = window.location.href;
                 var subscriptionUrl = currentUrl + "/sub";
+                // Add country filter from region selector
+                var wkRegionEl = document.getElementById('wkRegion');
+                if (wkRegionEl && wkRegionEl.value) {
+                    subscriptionUrl += "?cc=" + wkRegionEl.value;
+                }
                 var schemeUrl = '';
                 var displayName = clientName || '';
                 var finalUrl = subscriptionUrl;
