@@ -2646,7 +2646,8 @@ Sitemap: https://example.com/sitemap.xml
         }
 
         // P1-1: KV subscription cache - cache key fingerprint
-        const cacheFingerprint = `${user}|${target}|${echConfig || ''}|${ev}|${et}|${ex}|${ena}|${epi}|${epd}|${egi}|${disablePreferred}|${piu}|${enableECH}`;
+        const countryFilter = url.searchParams.get('cc')?.toUpperCase() || '';
+        const cacheFingerprint = `${user}|${target}|${echConfig || ''}|${ev}|${et}|${ex}|${ena}|${epi}|${epd}|${egi}|${disablePreferred}|${piu}|${enableECH}|${countryFilter}`;
         const cacheKey = `sub:${await hashFingerprint(cacheFingerprint)}`;
 
         // P1-1: Check KV cache for HIT at start of function
@@ -2830,6 +2831,16 @@ Sitemap: https://example.com/sitemap.xml
         // P1-2: Extract link strings from objects for subscription generation
         const linkStrings = finalLinks.map(item => typeof item === 'object' ? item.link : item);
 
+        // Country filter: ?cc=TR → 只保留 remark 含 -TR 的節點
+        const filteredLinkStrings = countryFilter
+            ? linkStrings.filter(link => {
+                try {
+                    const fragment = decodeURIComponent(link.split('#')[1] || '');
+                    return fragment.includes(`-${countryFilter}`);
+                } catch { return false; }
+              })
+            : linkStrings;
+
         let subscriptionContent;
         let contentType = 'text/plain; charset=utf-8';
 
@@ -2839,7 +2850,7 @@ Sitemap: https://example.com/sitemap.xml
             case 'stash':
             case 'meta':
             case 'clashmeta':
-                subscriptionContent = generateClashYaml(linkStrings);
+                subscriptionContent = generateClashYaml(filteredLinkStrings);
                 contentType = 'text/yaml; charset=utf-8';
                 break;
             case atob('c3VyZ2U='):     // surge
