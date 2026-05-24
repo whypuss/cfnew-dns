@@ -2927,8 +2927,8 @@ Sitemap: https://example.com/sitemap.xml
         let checkedLinks = finalLinks;
         if (enableLivenessCheck) {
             checkedLinks = await filterAliveNodes(finalLinks, env);
-            headers['x-alive-count'] = String(checkedLinks.length);
-            headers['x-total-count'] = String(finalLinks.length);
+            responseHeaders['x-alive-count'] = String(checkedLinks.length);
+            responseHeaders['x-total-count'] = String(finalLinks.length);
         }
         const checkedLinkStrings = checkedLinks.map(l => typeof l === 'object' ? l.link : l);
 
